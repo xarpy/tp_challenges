@@ -1,0 +1,13 @@
+version: "3"
+services:
+  telescopes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    container_name: telescopes
+    volumes:
+      - .:/telescopes
+    restart: on-failure
+    stdin_open: true
+    tty: true

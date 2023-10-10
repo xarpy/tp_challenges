@@ -1,0 +1,13 @@
+-r base.in
+
+python-dotenv==1.0.0
+black==23.9.1
+mypy==1.5.1
+flake8==6.1.0
+ipdb==0.13.13
+pre-commit==3.4.0
+isort==5.12.0
+interrogate==1.5.0
+bandit==1.7.5
+pytest==7.4.2
+coverage==7.3.2
