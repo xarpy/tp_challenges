@@ -1,8 +1,11 @@
 import os
 import sys
+import re
 from spacy import load
+from spacy.tokens import Doc
 from spacy.matcher import Matcher
 from pathlib import Path
+from typing import Tuple, Any, List, Iterator
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -19,7 +22,11 @@ class GoogleDriveAPI:
         self.list_fields = "nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)"
         self.page_size = 100
 
-    def get_session(self):
+    def get_session(self) -> Any:
+        """Function created to connect to google drive via the google API
+        Returns:
+            Any: Returns a session object from the connection
+        """
         creds = None
         if os.path.exists("token.json"):
             creds = Credentials.from_authorized_user_file(
@@ -37,21 +44,31 @@ class GoogleDriveAPI:
                 token.write(creds.to_json())
         return build("drive", "v3", credentials=creds)
 
-    def get_size_format(self, b, factor=1024, suffix="B"):
-        """
-        Scale bytes to its proper byte format
-        e.g:
-            1253656 => '1.20MB'
-            1253656678 => '1.17GB'
+    def get_size_format(
+            self, byte:int, factor: int = 1024, suffix: str ="B") -> str:
+        """ Scale bytes to its proper byte format
+        Args:
+            byte (int): Integer passed relative to size
+            factor (int, optional): Size factor for calculation, in bits_.Defaults to 1024.
+            suffix (str, optional): Suffix, relating to type,. Defaults to "B".
+
+        Returns:
+            str: Returns a string with the size definition.
         """
         for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
-            if b < factor:
-                return f"{b:.2f}{unit}{suffix}"
-            b /= factor
-        return f"{b:.2f}Y{suffix}"
+            if byte < factor:
+                return f"{byte:.2f}{unit}{suffix}"
+            byte /= factor
+        return f"{byte:.2f}Y{suffix}"
 
-    def list_files(self, items):
-        """given items returned by Google Drive API, prints them in a tabular way"""
+    def list_files(self, items: List) -> str:
+        """Function created to list the fields and columns of the files to be displayed.
+        Args:
+            items (List): Dictionary list, containing file references.
+        Returns:
+            str: Returns a tabulated and formatted string, to be displayed correctly
+            showing all the files in the connected Google Drive.
+        """
         if items:
             rows = []
             headers = ["ID", "Name", "Parents", "Size", "Type", "Modified Time"]
@@ -72,9 +89,11 @@ class GoogleDriveAPI:
         else:
             print("No files found.")
 
-    def show_itens(self):
-        """Shows basic usage of the Drive v3 API.
-        Prints the names and ids of the first 5 files the user has access to.
+    def show_itens(self) -> str:
+        """Function created to show all items in google drive
+        Returns:
+            str: Returns a formatted string with most of the items in google drive.
+            The number of items depends on the page_size variable.
         """
         service = self.get_session()
         results = service.files().list(
@@ -85,29 +104,58 @@ class GoogleDriveAPI:
 
 class MetaEngine:
     def __init__(self) -> None:
-        self._nlp = load("en_core_web_md")
+        self._nlp = load("en_core_web_sm")
 
-    def _extract_texts(self, items):
+    def _extract_texts(self, items: List) -> List[Iterator[Doc]]:
+        """Function created to extract file names and convert them into
+        Doc type for being processed.
+        Args:
+            items (List): List of file names
+        Returns:
+            List[Iterator[Doc]]: Returns a Doc object
+        """
         rows = []
         if items:
             for item in items:
                 name = item.get("name")
-                rows.append(name)
+                rows.append(self.handle_phrase(name))
         rows = self._nlp.pipe(rows)
         return rows
 
-    def _data_processing(self, documents, keywords):
+    def handle_phrase(self, phrase: str) -> str:
+        """Function created to treat phrases and remove characters,
+        making the search process easier.
+        Args:
+            phrase (str): Entry sentence
+        Returns:
+            str: Sentence processed
+        """
+        output = re.findall('[A-Z]?[a-z]+',phrase)
+        new_phrase = ' '.join([word for word in output])
+        return new_phrase
+
+    def _data_processing(
+            self, documents: List[Iterator[Doc]], keywords:Tuple[Any, Any]) -> str:
+        """Function created to process the data and find the correct file
+        based on the word given.
+        Args:
+            documents (List[Iterator[Doc]]): Doc object with all sentences
+            keywords (Tuple[Any, Any]): Keyword given
+
+        Returns:
+            str: Returns the name of the file found.
+        """
         pattern = []
         matcher = Matcher(self._nlp.vocab)
         for word in keywords:
-            pattern.append({"text": word})
+            pattern.append({"TEXT": word})
         for doc in documents:
-            field_name_reference = "_".join(keywords)
-            matcher.add(field_name_reference, [pattern])
+            matcher.add("matching", [pattern])
             found = matcher(doc)
-            print("Matches:", [doc[start:end].text for match_id, start, end in found])
+            if found:
+                print("Matches: " + str(doc))
 
-    def output(self, itens, keywords):
+    def output(self, itens: List, keywords: Tuple):
         text = self._extract_texts(itens)
         self._data_processing(documents=text, keywords=keywords)
 
@@ -117,8 +165,11 @@ class DocumentSearcher:
         self._google_api = GoogleDriveAPI()
         self._meta_emgine = MetaEngine()
 
-    def main(self, *args, **kwargs):
-        """Shows basic usage of the Drive v3 API."""
+    def main(self, *args: Tuple[Tuple[Any, Any]]) -> str:
+        """Function that initialized the script
+        Returns:
+            str: Returns the result
+        """
         size = self._google_api.page_size
         fieldlist = self._google_api.list_fields
         session = self._google_api.get_session()
@@ -132,5 +183,6 @@ class DocumentSearcher:
 
 
 if __name__ == "__main__":
+    """Context for running the main"""
     engine = DocumentSearcher()
     engine.main(sys.argv)
