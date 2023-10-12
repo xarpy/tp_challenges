@@ -1,24 +1,27 @@
 import os
-import sys
 import re
-from spacy import load
-from spacy.tokens import Doc
-from spacy.matcher import Matcher
+import sys
 from pathlib import Path
-from typing import Tuple, Any, List, Iterator
+from typing import Any, Iterator, List, Tuple
 
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from spacy import load
+from spacy.matcher import Matcher
+
+# from spacy.tokens import Doc
 from tabulate import tabulate
 
 
 class GoogleDriveAPI:
     def __init__(self) -> None:
         self._base_dir = Path(__file__).resolve().parent.parent
-        self._credentials = os.path.join(self._base_dir, os.getenv("CREDENTIAL_FILENAME"))
-        self._scopes = os.getenv("SCOPES").split(',')
+        self._credentials = os.path.join(
+            self._base_dir, os.getenv("CREDENTIAL_FILENAME")
+        )
+        self._scopes = os.getenv("SCOPES").split(",")
         self.list_fields = "nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)"
         self.page_size = 100
 
@@ -45,11 +48,13 @@ class GoogleDriveAPI:
         return build("drive", "v3", credentials=creds)
 
     def get_size_format(
-            self, byte:int, factor: int = 1024, suffix: str ="B") -> str:
-        """ Scale bytes to its proper byte format
+        self, byte: int, factor: int = 1024, suffix: str = "B"
+    ) -> str:
+        """Scale bytes to its proper byte format
         Args:
             byte (int): Integer passed relative to size
-            factor (int, optional): Size factor for calculation, in bits_.Defaults to 1024.
+            factor (int, optional): Size factor for calculation, in bits_.
+            Defaults to 1024.
             suffix (str, optional): Suffix, relating to type,. Defaults to "B".
 
         Returns:
@@ -62,27 +67,37 @@ class GoogleDriveAPI:
         return f"{byte:.2f}Y{suffix}"
 
     def list_files(self, items: List) -> str:
-        """Function created to list the fields and columns of the files to be displayed.
+        """Function created to list the fields and columns of the files to be
+            displayed.
         Args:
             items (List): Dictionary list, containing file references.
         Returns:
-            str: Returns a tabulated and formatted string, to be displayed correctly
-            showing all the files in the connected Google Drive.
+            str: Returns a tabulated and formatted string, to be displayed
+            correctly showing all the files in the connected Google Drive.
         """
         if items:
             rows = []
-            headers = ["ID", "Name", "Parents", "Size", "Type", "Modified Time"]
+            headers = [
+                "ID",
+                "Name",
+                "Parents",
+                "Size",
+                "Type",
+                "Modified Time",
+            ]
             for item in items:
                 id = item["id"]
                 name = item["name"]
-                parents = item.get('parents', "N/A")
+                parents = item.get("parents", "N/A")
                 if item.get("size"):
                     size = self.get_size_format(int(item["size"]))
                 else:
                     size = "N/A"
                 mime_type = item["mimeType"]
                 modified_time = item["modifiedTime"]
-                rows.append((id, name, parents, size, mime_type, modified_time))
+                rows.append(
+                    (id, name, parents, size, mime_type, modified_time)
+                )
             print("Files:")
             table = tabulate(rows, headers)
             print(table)
@@ -92,12 +107,15 @@ class GoogleDriveAPI:
     def show_itens(self) -> str:
         """Function created to show all items in google drive
         Returns:
-            str: Returns a formatted string with most of the items in google drive.
-            The number of items depends on the page_size variable.
+            str: Returns a formatted string with most of the items in google
+            drive.The number of items depends on the page_size variable.
         """
         service = self.get_session()
-        results = service.files().list(
-            pageSize=self.page_size, fields=self.list_fields).execute()
+        results = (
+            service.files()
+            .list(pageSize=self.page_size, fields=self.list_fields)
+            .execute()
+        )
         items = results.get("files", [])
         self.list_files(items)
 
@@ -106,7 +124,7 @@ class MetaEngine:
     def __init__(self) -> None:
         self._nlp = load("en_core_web_sm")
 
-    def _extract_texts(self, items: List) -> List[Iterator[Doc]]:
+    def _extract_texts(self, items: List) -> list[Iterator[Any]]:
         """Function created to extract file names and convert them into
         Doc type for being processed.
         Args:
@@ -130,12 +148,13 @@ class MetaEngine:
         Returns:
             str: Sentence processed
         """
-        output = re.findall('[A-Z]?[a-z]+',phrase)
-        new_phrase = ' '.join([word for word in output])
+        output = re.findall("[A-Z]?[a-z]+", phrase)
+        new_phrase = " ".join([word for word in output])
         return new_phrase
 
     def _data_processing(
-            self, documents: List[Iterator[Doc]], keywords:Tuple[Any, Any]) -> str:
+        self, documents: list[Iterator[Any]], keywords: tuple[Any, Any]
+    ) -> str:
         """Function created to process the data and find the correct file
         based on the word given.
         Args:
@@ -165,7 +184,7 @@ class DocumentSearcher:
         self._google_api = GoogleDriveAPI()
         self._meta_emgine = MetaEngine()
 
-    def main(self, *args: Tuple[Tuple[Any, Any]]) -> str:
+    def main(self, *args: tuple[tuple[Any, Any]]) -> str:
         """Function that initialized the script
         Returns:
             str: Returns the result
@@ -173,7 +192,9 @@ class DocumentSearcher:
         size = self._google_api.page_size
         fieldlist = self._google_api.list_fields
         session = self._google_api.get_session()
-        results = session.files().list(pageSize=size, fields=fieldlist).execute()
+        results = (
+            session.files().list(pageSize=size, fields=fieldlist).execute()
+        )
         items = results.get("files", [])
         if len(args[0]) < 2:
             self._google_api.show_itens()
