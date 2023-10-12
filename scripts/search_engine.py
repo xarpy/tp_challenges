@@ -22,7 +22,7 @@ class GoogleDriveAPI:
         )
         self._scopes = os.getenv("SCOPES").split(",")  # type: ignore
         self.list_fields = "nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)"
-        self.page_size = 100
+        self.page_size = int(os.getenv("PAGE_SIZE"))  # type: ignore
 
     def get_session(self) -> Any:
         """Function created to connect to google drive via the google API
