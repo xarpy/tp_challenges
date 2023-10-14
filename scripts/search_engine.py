@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-from pathlib import Path
 from typing import Any, Dict, Iterator, List
 
 from google.auth.transport.requests import Request
@@ -13,33 +12,36 @@ from spacy.matcher import Matcher
 from spacy.tokens import Doc
 from tabulate import tabulate  # type: ignore
 
+from . import get_filepath, logger
+
 
 class GoogleDriveAPI:
     def __init__(self) -> None:
-        self._base_dir = Path(__file__).resolve().parent.parent
-        self._credentials = os.path.join(
-            self._base_dir, os.getenv("CREDENTIAL_FILENAME")  # type: ignore
-        )
-        self._scopes = os.getenv("SCOPES").split(",")  # type: ignore
+        self._credentials = get_filepath(os.environ["CREDENTIAL_FILENAME"])
+        self._scopes = os.environ["SCOPES"].split(",")
         self.list_fields = "nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)"
-        self.page_size = int(os.getenv("PAGE_SIZE"))  # type: ignore
+        self.page_size = int(os.environ["PAGE_SIZE"])
+
+    @property
+    def scopes(self) -> List[str]:
+        result = [item.strip() for item in self._scopes if len(item) > 0]
+        return result
 
     def get_session(self) -> Any:
-        """Function created to connect to google drive via the google API
+        """Function createed to connect to google drive via the google API
         Returns:
             Any: Returns a session object from the connection
         """
         creds = None
+        scopes = self.scopes[0] if len(self.scopes) == 1 else self.scopes
         if os.path.exists("token.json"):
-            creds = Credentials.from_authorized_user_file(
-                "token.json", self._scopes
-            )
+            creds = Credentials.from_authorized_user_file("token.json", scopes)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    self._credentials, self._scopes
+                    self._credentials, scopes
                 )
                 creds = flow.run_local_server(port=0)
             with open("token.json", "w") as token:
@@ -119,10 +121,10 @@ class GoogleDriveAPI:
         items = results.get("files", [])
         drive = self.list_files(items)
         if drive.get("data"):
-            print(drive.get("message"), end="\n")
-            print(drive.get("data"))
+            logger.info(drive.get("message"))
+            logger.info(drive.get("data"))
         else:
-            print(drive.get("message"))
+            logger.info(drive.get("message"))
 
 
 class MetaEngine:
@@ -177,7 +179,7 @@ class MetaEngine:
             matcher.add("matching", [pattern])
             found = matcher(doc)
             if found:
-                print("Matches: " + str(doc))
+                logger.info(f"Matches: {str(doc)}")
 
     def output(self, itens: List[Any], keywords: tuple[Any, Any]) -> None:
         text = self._extract_texts(itens)

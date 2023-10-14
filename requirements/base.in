@@ -8,3 +8,4 @@ tqdm==4.66.1
 spacy==3.7.1
 pandas==2.1.1
 playwright==1.38.0
+rich==13.6.0
