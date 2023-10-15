@@ -5,9 +5,12 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file: .env
+    environment:
+      - DISPLAY=:0 # Replace this line with the appropriate value
     container_name: telescopes
     volumes:
       - .:/telescopes
+      - /tmp/.X11-unix:/tmp/.X11-unix
     restart: on-failure
     stdin_open: true
     tty: true

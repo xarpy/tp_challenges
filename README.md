@@ -21,7 +21,12 @@ pip install --upgrade pip && pip install --require-hashes -r requirements/dev.tx
 After installing all dependencies,compile this project with command:
 
 ```sh
-python scripts/<module-you-want-test>.py
+python -m spacy download en_core_web_sm && playwright install
+```
+
+And to run each script, just use the command below:
+```sh
+python -m scripts.<module-you-want-test>
 ```
 
 ### Docker Build
@@ -35,15 +40,15 @@ docker compose up --build
 After build project, in another terminal, apply the command:
 
 ```sh
-docker exec -it ...
+docker exec -it telescopes python -m scripts.<module-you-want-test>
 ```
 
 
 **Obs:**
 
 * For practical use of the application it is necessary to add single quotes, making it a valid argument.
-* For two arguments or more, follow the formatting premise of the input arguments above.
-* Don't forget to create the environment variables file, as per the "env.example" file
+* the search_engine script was tested with an exact file search argument.
+* We recommend creating the credentials for using the search_engine script in the examples folder, otherwise it won't work with the name `google-drive.json`.
 
 
 ## Dependencies
@@ -78,28 +83,26 @@ We use the **microservices architecture patterns** with **DDD principle**, to cr
 
 ```sh
 ./
-├──examples/
-│   ├──companies_linkedin.csv
-│   └──google-drive.json
-├──requirements/
-│   ├──base.in
-│   ├──base.txt
-│   ├──dev.in
-│   └──dev.txt
-├──scripts/
+├── examples/
+│   ├── companies_linkedin.csv
+│   └──  g2_urls.csv
+├── requirements/
+│   ├── base.in
+│   ├── base.txt
+│   ├── dev.in
+│   └── dev.txt
+├── scripts/
 │   ├──company_details.py
-│   ├──count_employees.py
-│   ├──credentials.json
-│   ├──__init__.py
+│   ├── count_employees.py
+│   ├── __init__.py
 │   └──search_engine.py
-├──tests/
-├──challenges.txt
-├──docker-compose.yml
-├──Dockerfile
-├──env.example
-├──LICENSE
-├──pyproject.toml
-└──README.md
+├── tests/
+├── docker-compose.yml
+├── Dockerfile
+├── env.example
+├── LICENSE
+├── pyproject.toml
+└── README.md
 
 ```
 
