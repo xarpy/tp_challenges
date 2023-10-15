@@ -9,6 +9,8 @@ from . import get_filepath, logger
 
 
 class DocumentReader:
+    """DocumentReader class"""
+
     def __init__(self) -> None:
         self._filename = os.environ["COMPANY_FILENAME"]
         self._sourcefile = get_filepath(self._filename)
@@ -19,7 +21,7 @@ class DocumentReader:
         Returns:
             List[str]: Return a list of string company names
         """
-        company_names = list(self._dataframe["Companies"].values)
+        company_names = self._dataframe["Companies"].to_list()
         return company_names
 
     def update_data(self, data: Dict[Any, Any]) -> None:
@@ -47,7 +49,10 @@ class DocumentReader:
 
 
 class Scrapper:
+    """Scrapper class"""
+
     def __init__(self) -> None:
+        self._headless = True
         self._url = "https://www.linkedin.com/home"
         self._login = os.getenv("ACCOUNT_NAME")
         self._password = os.getenv("ACCOUNT_PASSWORD")
@@ -58,7 +63,7 @@ class Scrapper:
             Browser: Returns the browser.
         """
         player = sync_playwright().start()
-        browser = player.chromium.launch(headless=False)
+        browser = player.chromium.launch(headless=self._headless)
         return browser
 
     def _linkedin_login(self, page: Any) -> None:
@@ -80,6 +85,10 @@ class Scrapper:
                     break
                 page.wait_for_timeout(2000)
             page.wait_for_timeout(5000)
+        elif "checkpoint/challenge" not in page.url:
+            logger.info(
+                "Sometimes the captcha appears, not this time, just keep going!"
+            )
         else:
             logger.error("Captcha page! Aborting due to headless mode...")
             sys.exit(1)
@@ -120,6 +129,8 @@ class Scrapper:
 
 
 class BuildManager:
+    """BuildManager class"""
+
     def __init__(self) -> None:
         self._scrapper = Scrapper()
         self._document_reader = DocumentReader()
@@ -129,9 +140,8 @@ class BuildManager:
         companies = self._document_reader.get_companies()
         information = self._scrapper.get_information(companies)
         self._document_reader.update_data(information)
-        logger.info(
-            f"All information are collected, please check on your {self._document_reader._filename}!"
-        )
+        message = f"All information are collected, please check on your {self._document_reader._filename}!"
+        logger.info(message)
 
 
 if __name__ == "__main__":

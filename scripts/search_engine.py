@@ -16,6 +16,8 @@ from . import get_filepath, logger
 
 
 class GoogleDriveAPI:
+    """GoogleDriveAPI class"""
+
     def __init__(self) -> None:
         self._credentials = get_filepath(os.environ["CREDENTIAL_FILENAME"])
         self._scopes = os.environ["SCOPES"].split(",")
@@ -128,6 +130,8 @@ class GoogleDriveAPI:
 
 
 class MetaEngine:
+    """MetaEngine class"""
+
     def __init__(self) -> None:
         self._nlp = load("en_core_web_sm")
 
@@ -186,7 +190,9 @@ class MetaEngine:
         self._data_processing(documents=text, keywords=keywords)
 
 
-class DocumentSearcher:
+class BuildManager:
+    """BuildManager class"""
+
     def __init__(self) -> None:
         self._google_api = GoogleDriveAPI()
         self._meta_emgine = MetaEngine()
@@ -212,5 +218,5 @@ class DocumentSearcher:
 
 if __name__ == "__main__":
     """Context for running the main"""
-    engine = DocumentSearcher()
+    engine = BuildManager()
     engine.main(sys.argv)  # type: ignore
