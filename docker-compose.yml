@@ -1,0 +1,18 @@
+version: "3"
+services:
+  telescopes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      - DISPLAY=${DISPLAY}
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    container_name: telescopes
+    volumes:
+      - .:/telescopes
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    restart: on-failure
+    stdin_open: true
+    tty: true

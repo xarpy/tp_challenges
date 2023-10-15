@@ -1,0 +1,13 @@
+# byte-compiled/optimized
+__pycache__/
+*.py[cod]
+
+# editors
+.vscode/
+
+# local environment variables
+.env
+.venv/
+
+# project coverage
+templates/coverage/
