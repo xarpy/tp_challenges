@@ -116,29 +116,7 @@ In this application, we used this dependencies to perform, scan and cover tests 
 
 In this application, unit tests were created, using **pytest**. Follow the instructions to run the tests:
 
-* To see tests list
-
-```sh
-pytest test -co
-```
-
-* To run all test
-
-```sh
-pytest .
-```
-
-* To run only test module
-
-```sh
-pytest -vv test/<test-script-you-want-test>.py
-```
-
-* To run only function test module
-
-```sh
-pytest -vv test/<test-script-you-want-test>.py::<name-of-function-you-want-test>
-```
+But the area is still under development and we should be able to finalize the unit tests soon.
 
 **Obs:**
 

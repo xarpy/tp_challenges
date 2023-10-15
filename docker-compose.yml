@@ -6,7 +6,9 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     environment:
-      - DISPLAY=:0 # Replace this line with the appropriate value
+      - DISPLAY=${DISPLAY}
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
     container_name: telescopes
     volumes:
       - .:/telescopes
