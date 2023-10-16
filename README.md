@@ -29,6 +29,11 @@ And to run each script, just use the command below:
 python -m scripts.<module-you-want-test>
 ```
 
+If it is a script that accepts arguments, just pass arguments like this:
+```sh
+python -m scripts.<module-you-want-test> paramenter
+```
+
 ### Docker Build
 
 You will need to have docker compose, and finally apply the command:
@@ -43,11 +48,15 @@ After build project, in another terminal, apply the command:
 docker exec -it telescopes python -m scripts.<module-you-want-test>
 ```
 
-
+If it is a script that accepts arguments, just pass arguments like this:
+```sh
+docker exec -it telescopes python -m scripts.<module-you-want-test> paramenter
+```
 **Obs:**
 
 * For practical use of the application it is necessary to add single quotes, making it a valid argument.
 * the search_engine script was tested with an exact file search argument.
+* By default, the second and third scripts do not accept headless mode arguments, making it necessary to activate it manually in the script.
 * We recommend creating the credentials for using the search_engine script in the examples folder, otherwise it won't work with the name `google-drive.json`.
 
 
