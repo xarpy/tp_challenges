@@ -53,9 +53,17 @@ ignore_missing_imports = true
 implicit_reexport = false
 
 [tool.pytest.ini_options]
+addopts = "--pdbcls=IPython.terminal.debugger:TerminalPdb"
 python_functions = ["test"]
+log_cli = true
+log_level = "INFO"
 python_files = ["test_*.py", "*_test.py", "tests/*.py"]
 testpaths = ["tests"]
+env = [
+    "CREDENTIAL_FILENAME=test.json",
+    "SCOPES=http://www.googleapis.com/",
+    "PAGE_SIZE=100"
+]
 
 [tool.coverage.run]
 branch = true

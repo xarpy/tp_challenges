@@ -9,5 +9,6 @@ pre-commit==3.4.0
 isort==5.12.0
 interrogate==1.5.0
 bandit==1.7.5
-pytest==7.4.2
+pytest==7.4.3
+pytest-env==1.1.1
 coverage==7.3.2

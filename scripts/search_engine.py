@@ -141,7 +141,8 @@ class MetaEngine:
         Args:
             items (List): List of file names
         Returns:
-            List[Iterator[Doc]]: Returns a Doc object
+            Iterator[Doc]: Returns a Iterator(generator) of Doc objects,
+            or empty Iterator.
         """
         rows = []
         if items:
@@ -169,16 +170,14 @@ class MetaEngine:
         """Function created to process the data and find the correct file
         based on the word given.
         Args:
-            documents (List[Iterator[Doc]]): Doc object with all sentences
+            documents (Iterator[Doc]): Doc object with all sentences
             keywords (Tuple[Any, Any]): Keyword given
 
         Returns:
             str: Returns the name of the file found.
         """
-        pattern = []
         matcher = Matcher(self._nlp.vocab)
-        for word in keywords:
-            pattern.append({"TEXT": word})
+        pattern = [{"TEXT": word} for word in keywords]
         for doc in documents:
             matcher.add("matching", [pattern])
             found = matcher(doc)
@@ -195,7 +194,7 @@ class BuildManager:
 
     def __init__(self) -> None:
         self._google_api = GoogleDriveAPI()
-        self._meta_emgine = MetaEngine()
+        self._meta_engine = MetaEngine()
 
     def main(self, *args: tuple[tuple[Any, Any]]) -> None:
         """Function that initialized the script
@@ -213,7 +212,7 @@ class BuildManager:
             self._google_api.show_itens()
         else:
             args[0].pop(0)  # type: ignore
-            self._meta_emgine.output(items, args[0])  # type: ignore
+            self._meta_engine.output(items, args[0])  # type: ignore
 
 
 if __name__ == "__main__":

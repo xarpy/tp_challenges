@@ -46,11 +46,19 @@ After build project, in another terminal, apply the command:
 
 ```sh
 docker exec -it telescopes python -m scripts.<module-you-want-test>
+
+or
+
+docker compose run telescopes python -m scripts.<module-you-want-test>
 ```
 
 If it is a script that accepts arguments, just pass arguments like this:
 ```sh
 docker exec -it telescopes python -m scripts.<module-you-want-test> paramenter
+
+or
+
+docker compose run telescopes python -m scripts.<module-you-want-test> paramenter
 ```
 
 **Obs:**
@@ -125,9 +133,59 @@ In this application, we used this dependencies to perform, scan and cover tests 
 * [Coverage](https://coverage.readthedocs.io/en/7.3.2/)
 * [Pytest](https://docs.pytest.org/en/7.4.x/)
 
-In this application, unit tests were created, using **pytest**. Follow the instructions to run the tests:
+In this application, unit tests were created, using **pytest**. Follow the instructions to run the tests. The commands are the same for both settings, just the environment follow belou the steps:
 
-But the area is still under development and we should be able to finalize the unit tests soon.
+### Environment Local
+
+* To see tests list
+
+```sh
+pytest --co
+```
+
+* To run all test
+
+```sh
+pytest tests/
+```
+
+* To run only test module
+
+```sh
+pytest tests/<module-you-want-test>.py
+```
+
+* To run only function test module
+
+```sh
+pytest tests/<module-you-want-test>.py::<function_teste_name>
+```
+
+### Container Environment
+
+* To see tests list
+
+```sh
+docker compose run telescopes pytest --co
+```
+
+* To run all test
+
+```sh
+docker compose run telescopes pytest tests/
+```
+
+* To run only test module
+
+```sh
+docker compose run telescopes pytest tests/<module-you-want-test>.py
+```
+
+* To run only function test module
+
+```sh
+docker compose run telescopes tests/<module-you-want-test>.py::<function_teste_name>
+```
 
 **Obs:**
 
