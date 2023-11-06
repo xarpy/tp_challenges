@@ -74,7 +74,7 @@ class Scrapper:
     """Scrapper class"""
 
     def __init__(self) -> None:
-        self._headless = True
+        self._headless = bool(int(os.environ["HEADLESS_MODE"]))
 
     def _get_browser(self) -> Browser:
         """Function created to instantiate the browser.

@@ -3,7 +3,7 @@ import sys
 from typing import Any, Dict, List
 
 from pandas import read_csv
-from playwright.sync_api import Browser, sync_playwright
+from playwright.sync_api import Browser, Page, sync_playwright
 
 from . import get_filepath, logger
 
@@ -52,10 +52,10 @@ class Scrapper:
     """Scrapper class"""
 
     def __init__(self) -> None:
-        self._headless = True
+        self._headless = bool(int(os.environ["HEADLESS_MODE"]))
         self._url = "https://www.linkedin.com/home"
-        self._login = os.getenv("ACCOUNT_NAME")
-        self._password = os.getenv("ACCOUNT_PASSWORD")
+        self._login = os.environ["ACCOUNT_NAME"]
+        self._password = os.environ["ACCOUNT_PASSWORD"]
 
     def _get_browser(self) -> Browser:
         """Function created to instantiate the browser.
@@ -66,10 +66,10 @@ class Scrapper:
         browser = player.chromium.launch(headless=self._headless)
         return browser
 
-    def _linkedin_login(self, page: Any) -> None:
+    def _linkedin_login(self, page: Page) -> None:
         """Function created to enter linkedin
         Args:
-            page (Any): Receive a page instance
+            page (Page): Receive a page instance
         """
         page.goto(self._url)
         page.locator("input#session_key").fill(self._login)
